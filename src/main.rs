@@ -5,7 +5,9 @@
 //! Description: A simple text editor written in Rust.
 //! Repository: https://github.com/willothy/red
 
-use red_tui::{Align, Border, BorderVariant, Label, Layout, Rect, Stack, Widget};
+use red_tui::{
+    float::FloatStack, Align, Border, BorderVariant, Label, Layout, Rect, Stack, Widget,
+};
 use termwiz::{
     caps::Capabilities,
     input::{InputEvent, KeyCode, KeyEvent, Modifiers, MouseEvent},
@@ -124,6 +126,41 @@ fn main() -> Result<()> {
         return &layouts[layout];
     };
 
+    let mut float_width = 50;
+    let mut float_height = 25;
+    let mut float_x = 80;
+    let mut float_y = 20;
+
+    let mut floats = FloatStack::new();
+    let mut main_float = floats.add(red_tui::float::Float {
+        contents: bordered![label!["Test"] => None],
+        rect: Rect {
+            x: float_x as f64,
+            y: float_y as f64,
+            width: float_width as f64,
+            height: float_height as f64,
+        },
+        z_index: 0,
+    });
+    floats.add(red_tui::float::Float {
+        contents: bordered![label!["Test"] => None],
+        rect: Rect {
+            x: 10.,
+            y: 10.,
+            width: 15.,
+            height: 10.,
+        },
+        z_index: 1,
+    });
+
+    let mut cycle_float = |main_float, nfloats| {
+        return if main_float + 1 == nfloats {
+            0
+        } else {
+            main_float + 1
+        };
+    };
+
     loop {
         let screen = buf.terminal().get_screen_size()?;
         let rect = red_tui::Rect {
@@ -134,6 +171,35 @@ fn main() -> Result<()> {
         };
         buf.add_change(Change::ClearScreen(Default::default()));
         ui.render(&rect, &mut buf);
+
+        floats.update(
+            main_float,
+            Rect {
+                x: float_x as f64,
+                y: float_y as f64,
+                width: float_width as f64,
+                height: float_height as f64,
+            },
+        );
+        floats.render(&rect, &mut buf);
+
+        /* This is how to render a floating window! */
+
+        // TODO: Implement floats, maybe as HashMap<z-index, Vec<Box<dyn Widget>>>?
+        /*
+        let l = bordered![label!["Test"] => None];
+        let mut l_surf = Surface::new(float_width, float_height);
+        l.render(
+            &Rect {
+                x: 0.,
+                y: 0.,
+                width: float_width as f64,
+                height: float_height as f64,
+            },
+            &mut l_surf,
+        );
+        buf.draw_from_screen(&l_surf, float_x, float_y);
+        */
 
         // Compute an optimized delta to apply to the terminal and display it
         buf.flush()?;
@@ -162,9 +228,61 @@ fn main() -> Result<()> {
                     }
                 }
                 InputEvent::Key(KeyEvent {
-                    key: KeyCode::Tab, ..
+                    key: KeyCode::UpArrow,
+                    modifiers,
                 }) => {
-                    ui = cycle_layout();
+                    if modifiers == Modifiers::SHIFT {
+                        float_height -= 1;
+                    } else {
+                        float_y -= 1;
+                    }
+                }
+                InputEvent::Key(KeyEvent {
+                    key: KeyCode::DownArrow,
+                    modifiers,
+                }) => {
+                    if modifiers == Modifiers::SHIFT {
+                        float_height += 1;
+                    } else {
+                        float_y += 1;
+                    }
+                }
+                InputEvent::Key(KeyEvent {
+                    key: KeyCode::LeftArrow,
+                    modifiers,
+                }) => {
+                    if modifiers == Modifiers::SHIFT {
+                        float_width -= 1;
+                    } else {
+                        float_x -= 1;
+                    }
+                }
+                InputEvent::Key(KeyEvent {
+                    key: KeyCode::RightArrow,
+                    modifiers,
+                }) => {
+                    if modifiers == Modifiers::SHIFT {
+                        float_width += 1;
+                    } else {
+                        float_x += 1;
+                    }
+                }
+                InputEvent::Key(KeyEvent {
+                    key: KeyCode::Tab,
+                    modifiers,
+                }) => {
+                    if modifiers == Modifiers::SHIFT {
+                        let t = cycle_float(main_float, floats.floats.len());
+                        let rect = &floats.floats[&t].rect;
+                        float_x = rect.x as usize;
+                        float_y = rect.y as usize;
+                        float_width = rect.width as usize;
+                        float_height = rect.height as usize;
+                        // floats.update_z_index(main_float, );
+                        main_float = t;
+                    } else {
+                        ui = cycle_layout();
+                    }
                 }
                 #[allow(unused_variables)]
                 InputEvent::Mouse(MouseEvent {
