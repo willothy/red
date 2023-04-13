@@ -40,22 +40,25 @@ fn main() -> Result<()> {
     term.set_raw_mode()?;
 
     let mut buf = BufferedTerminal::new(term)?;
+    buf.add_change(Change::CursorVisibility(
+        termwiz::surface::CursorVisibility::Hidden,
+    ));
 
     buf.flush()?;
 
     macro_rules! horizontal {
-        [$($v:expr),*$(,)?] => {
+        [$($v:expr),*$(,)? => $s:expr] => {
             Layout::h(vec![
                 $($v),*
-            ])
+            ], $s)
         };
     }
 
     macro_rules! vertical {
-        [$($v:expr),*$(,)?] => {
+        [$($v:expr),*$(,)?=> $s:expr] => {
             Layout::v(vec![
                 $($v),*
-            ])
+            ], $s)
         };
     }
 
@@ -66,34 +69,46 @@ fn main() -> Result<()> {
     }
 
     macro_rules! bordered {
-        ($v:expr) => {
-            Box::new(Border::new(BorderVariant::Rounded, $v))
+        ($v:expr => $s:expr) => {
+            Box::new(Border::new(BorderVariant::Rounded, $v, $s))
         };
     }
 
     let layouts = vec![
         horizontal![
-            bordered![label!["Window 1!"].center()],
-            bordered![label!["Window 2!"].center()],
+            bordered![label!["Window 1!"].center() => Some(red_tui::SizeHint::Percentage(0.3))],
+            bordered![label!["Window 2!"].center() => Some(red_tui::SizeHint::Percentage(0.7))],
+            => None
         ],
         vertical![
-            bordered![label!["Window 1!"].center()],
-            bordered![label!["Window 2!"].center()],
-        ],
-        horizontal![
-            vertical![bordered![label!["Window 1!"].center()],],
-            vertical![
-                bordered![label!["Window 2!"].center()],
-                bordered![label!["Window 3!"].center()],
-                bordered![label!["Window 4!"].center()],
-            ],
+            bordered![label!["Window 1!"].center() => None],
+            bordered![label!["Window 2!"].center() => None],
+            => None
         ],
         horizontal![
             vertical![
-                bordered![label!["Window 1!"].center()],
-                bordered![label!["Window 2!"].center()],
+                bordered![label!["Window 1!"].center() => None],
+                => None
             ],
-            vertical![bordered![label!["Window 3!"].center()],],
+            vertical![
+                bordered![label!["Window 2!"].center() => None],
+                bordered![label!["Window 3!"].center() => None],
+                bordered![label!["Window 4!"].center() => None],
+                => None
+            ],
+            => None
+        ],
+        horizontal![
+            vertical![
+                bordered![label!["Window 1!"].center() => None],
+                bordered![label!["Window 2!"].center() => None],
+                => None
+            ],
+            vertical![
+                bordered![label!["Window 3!"].center() => None],
+                => None
+            ],
+            => None
         ],
     ];
 
@@ -139,6 +154,9 @@ fn main() -> Result<()> {
                     if c == 'q' && modifiers == Modifiers::CTRL {
                         // Quit the app when q is pressed
                         buf.add_change(Change::ClearScreen(Default::default()));
+                        buf.add_change(Change::CursorVisibility(
+                            termwiz::surface::CursorVisibility::Visible,
+                        ));
                         buf.flush()?;
                         break;
                     }
