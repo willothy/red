@@ -5,14 +5,33 @@
 //! Description: A simple text editor written in Rust.
 //! Repository: https://github.com/willothy/red
 
-use red_tui::{Align, Border, BorderVariant, Label, Layout, Stack, Widget};
+use red_tui::{Align, Border, BorderVariant, Label, Layout, Rect, Stack, Widget};
 use termwiz::{
     caps::Capabilities,
     input::{InputEvent, KeyCode, KeyEvent, Modifiers, MouseEvent},
-    surface::Change,
+    surface::{Change, Surface},
     terminal::{buffered::BufferedTerminal, new_terminal, Terminal},
     Result,
 };
+
+struct RenderData {
+    rect: Rect,
+    data: Vec<Vec<char>>,
+}
+
+impl RenderData {
+    fn new(widget: Box<dyn Widget>, rect: Rect) -> Self {
+        Self {
+            data: vec![vec![' '; rect.width as usize]; rect.height as usize],
+            rect,
+        }
+    }
+
+    fn render(&mut self, widget: Box<dyn Widget>) {
+        let mut term = Surface::new(self.rect.width as usize, self.rect.height as usize);
+        widget.render(&self.rect, &mut term);
+    }
+}
 
 fn main() -> Result<()> {
     let caps = Capabilities::new_from_env()?;
@@ -52,31 +71,44 @@ fn main() -> Result<()> {
         };
     }
 
-    let layer1 = vertical![
+    let layouts = vec![
         horizontal![
-            label!["Hello, world 1!"].center(),
-            label!["Hello, world 2!"].center(),
-            label!["Hello, world 3!"].center()
+            bordered![label!["Window 1!"].center()],
+            bordered![label!["Window 2!"].center()],
+        ],
+        vertical![
+            bordered![label!["Window 1!"].center()],
+            bordered![label!["Window 2!"].center()],
         ],
         horizontal![
-            label![""].center(),
-            // label!["Hello, world 5!"].center(),
-            // label!["Hello, world 6!"].center()
-        ],
-    ];
-    let layer2 = vertical![
-        horizontal![
-            bordered![label!["Hello, world 7!"].center()],
-            bordered![label!["Hello, world 8!"].center()],
-            bordered![label!["Hello, world 9!"].center()]
+            vertical![bordered![label!["Window 1!"].center()],],
+            vertical![
+                bordered![label!["Window 2!"].center()],
+                bordered![label!["Window 3!"].center()],
+                bordered![label!["Window 4!"].center()],
+            ],
         ],
         horizontal![
-            bordered![label!["Hello, world 10!"].center()],
-            bordered![label!["Hello, world 11!"].center()],
+            vertical![
+                bordered![label!["Window 1!"].center()],
+                bordered![label!["Window 2!"].center()],
+            ],
+            vertical![bordered![label!["Window 3!"].center()],],
         ],
     ];
 
-    let stack = Stack::new().with_layer(0, layer1).with_layer(1, layer2);
+    let mut layout = 0;
+    let mut ui = &layouts[layout];
+
+    let mut cycle_layout = || {
+        layout = if layout + 1 == layouts.len() {
+            0
+        } else {
+            layout + 1
+        };
+        return &layouts[layout];
+    };
+
     loop {
         let screen = buf.terminal().get_screen_size()?;
         let rect = red_tui::Rect {
@@ -86,7 +118,7 @@ fn main() -> Result<()> {
             height: screen.rows as f64,
         };
         buf.add_change(Change::ClearScreen(Default::default()));
-        stack.render(&rect, &mut buf);
+        ui.render(&rect, &mut buf);
 
         // Compute an optimized delta to apply to the terminal and display it
         buf.flush()?;
@@ -101,13 +133,20 @@ fn main() -> Result<()> {
             }
             Ok(Some(input)) => match input {
                 InputEvent::Key(KeyEvent {
-                    key: KeyCode::Char('q'),
-                    modifiers: Modifiers::CTRL,
+                    key: KeyCode::Char(c),
+                    modifiers,
                 }) => {
-                    // Quit the app when escape is pressed
-                    buf.add_change(Change::ClearScreen(Default::default()));
-                    buf.flush()?;
-                    break;
+                    if c == 'q' && modifiers == Modifiers::CTRL {
+                        // Quit the app when q is pressed
+                        buf.add_change(Change::ClearScreen(Default::default()));
+                        buf.flush()?;
+                        break;
+                    }
+                }
+                InputEvent::Key(KeyEvent {
+                    key: KeyCode::Tab, ..
+                }) => {
+                    ui = cycle_layout();
                 }
                 #[allow(unused_variables)]
                 InputEvent::Mouse(MouseEvent {
