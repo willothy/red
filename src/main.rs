@@ -5,7 +5,7 @@
 //! Description: A simple text editor written in Rust.
 //! Repository: https://github.com/willothy/red
 
-use red_tui::{
+use sanguine::{
     float::FloatStack, Align, Border, BorderVariant, Label, Layout, Rect, Stack, Ui, Widget,
 };
 use termwiz::{
@@ -78,8 +78,8 @@ fn main() -> Result<()> {
 
     let layouts = vec![
         horizontal![
-            bordered![label!["Window 1!"].center() => Some(red_tui::SizeHint::Percentage(0.3))],
-            bordered![label!["Window 2!"].center() => Some(red_tui::SizeHint::Percentage(0.7))],
+            bordered![label!["Window 1!"].center() => Some(sanguine::SizeHint::Percentage(0.3))],
+            bordered![label!["Window 2!"].center() => Some(sanguine::SizeHint::Percentage(0.7))],
             => None
         ],
         vertical![
@@ -119,8 +119,8 @@ fn main() -> Result<()> {
 
     let mut ui = Ui::new(
         horizontal![
-            bordered![label!["Window 1!"].center() => Some(red_tui::SizeHint::Percentage(0.3))],
-            bordered![label!["Window 2!"].center() => Some(red_tui::SizeHint::Percentage(0.7))],
+            bordered![label!["Window 1!"].center() => Some(sanguine::SizeHint::Percentage(0.3))],
+            bordered![label!["Window 2!"].center() => Some(sanguine::SizeHint::Percentage(0.7))],
             => None
         ],
         buf,
@@ -131,7 +131,7 @@ fn main() -> Result<()> {
     let float_width = 20;
     let float_height = 10;
     ui.init()?;
-    ui.add_float(red_tui::float::Float {
+    ui.add_float(sanguine::float::Float {
         contents: bordered![label!["Test"] => None],
         rect: Rect {
             x: 10.,
@@ -141,7 +141,7 @@ fn main() -> Result<()> {
         },
         z_index: 1,
     });
-    ui.add_float(red_tui::float::Float {
+    ui.add_float(sanguine::float::Float {
         contents: bordered![label!["Test"] => None],
         rect: Rect {
             x: float_x as f64,
@@ -153,7 +153,7 @@ fn main() -> Result<()> {
     });
 
     while ui.render()? {}
-    // let mut main_float = floats.add(red_tui::float::Float {
+    // let mut main_float = floats.add(sanguine::float::Float {
     //     contents: bordered![label!["Test"] => None],
     //     rect: Rect {
     //         x: float_x as f64,
@@ -163,7 +163,7 @@ fn main() -> Result<()> {
     //     },
     //     z_index: 0,
     // });
-    // floats.add(red_tui::float::Float {
+    // floats.add(sanguine::float::Float {
     //     contents: bordered![label!["Test"] => None],
     //     rect: Rect {
     //         x: 10.,

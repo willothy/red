@@ -643,17 +643,8 @@ dependencies = [
  "clap",
  "crop",
  "itertools",
- "red-tui",
+ "sanguine",
  "serde",
- "termwiz",
-]
-
-[[package]]
-name = "red-tui"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "itertools",
  "termwiz",
 ]
 
@@ -706,6 +697,15 @@ dependencies = [
  "libc",
  "linux-raw-sys",
  "windows-sys",
+]
+
+[[package]]
+name = "sanguine"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "itertools",
+ "termwiz",
 ]
 
 [[package]]

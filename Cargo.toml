@@ -7,7 +7,7 @@ edition = "2021"
 
 [workspace]
 members = [
-    "red-tui",
+    "sanguine",
 ]
 
 [dependencies]
@@ -16,4 +16,4 @@ crop = "0.2.0"
 itertools = "0.10.5"
 serde = { version = "1.0.159", features = ["derive"] }
 termwiz = { version = "0.20.0", features = ["serde"] }
-red-tui = { path = "./red-tui" }
+sanguine = { path = "./sanguine" }
