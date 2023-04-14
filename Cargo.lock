@@ -702,6 +702,7 @@ dependencies = [
 [[package]]
 name = "sanguine"
 version = "0.1.0"
+source = "git+https://github.com/willothy/sanguine#3c345581afedc152648db73dc2c5a75b0cdd9680"
 dependencies = [
  "anyhow",
  "itertools",

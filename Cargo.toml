@@ -3,12 +3,6 @@ name = "red"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[workspace]
-members = [
-    "sanguine",
-]
 
 [dependencies]
 clap = { version = "4.2.1", features = ["derive"] }
@@ -16,4 +10,4 @@ crop = "0.2.0"
 itertools = "0.10.5"
 serde = { version = "1.0.159", features = ["derive"] }
 termwiz = { version = "0.20.0", features = ["serde"] }
-sanguine = { path = "./sanguine" }
+sanguine = { git = "https://github.com/willothy/sanguine" }
