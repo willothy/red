@@ -5,6 +5,7 @@ Text editor and TUI multiplexing library, for fun and education.
 ## Features:
 
 - [x] Floating windows
+  - [ ] Render optimizations
 - [x] Horizontal and vertical splits
 - [x] Global keyboard events
 - [x] Extensible widget trait
@@ -21,7 +22,7 @@ Watch in fullscreen, the lines don't render properly in a small viewport.
 
 ## Demo usage
 
-The TUI library is not yet ready for use so it hasn't been published yet, but the binary crate currently runs the demo if you want to try it out.
+The TUI library is not yet ready for use so it hasn't been published yet, but you can run the `demo` if you want to try it out.
 
 ```sh
 
@@ -29,13 +30,14 @@ $ git clone git@github.com:willothy/red
 
 $ cd red
 
-$ cargo run --release
+$ cargo run --example demo
 
 ```
 
 ### Demo keymaps:
 
-- `<Tab>`: switch layout
+- `<C-q>`: quit
+- `<Tab>`: switch layout (not working with new UI manager yet)
 - `<Shift-Tab>`: switch current float
 - `<Up>`: move the current float up
 - `<Down>`: move the current float down
